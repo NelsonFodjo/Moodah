@@ -61,7 +61,7 @@ async function fetchGroqMood(emojis, username) {
     throw new Error('GROQ_API_KEY is required for AI-only mood generation. Set it as a repository secret in GitHub Actions.');
   }
 
-  const prompt = `You are the mood curator for MOODAH. Analyze the feeling behind the emoji sequence and the username below. Reply with only valid JSON in the exact shape {"mood": "...", "description": "..."} Reply in the first person.
+  const prompt = `You are the mood curator for MOODAH. Analyze the feeling behind the emoji sequence and the username below. Reply with only valid JSON in the exact shape {"mood": "...", "description": "..."} Reply without mentioning the user's name. Just like a normal description to the mood you analyzed.
 
 username: ${username}
 emojis: ${emojis.join(' ')}
