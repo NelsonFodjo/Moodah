@@ -7,7 +7,6 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-      - closed
     paths:
       - 'data/manifest.json'
 
@@ -17,7 +16,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event.action != 'closed' && github.event.pull_request.draft == false }}
+    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
 
     steps:
@@ -52,27 +51,31 @@ jobs:
         run: |
           gh pr merge "${{ github.event.pull_request.number }}" --auto --merge --delete-branch
 
-  generate-mood:
-    if: ${{ github.event.action == 'closed' && github.event.pull_request.merged == true }}
-    runs-on: ubuntu-latest
+      - name: Wait for merge to complete
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for i in $(seq 1 30); do
+            state=$(gh pr view "${{ github.event.pull_request.number }}" --json state -q .state)
+            if [ "$state" = "MERGED" ]; then
+              echo "PR merged."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "PR did not merge within timeout" >&2
+          exit 1
 
-    steps:
       - name: Check out main
+        if: success()
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Generate AI mood and description
+        if: success()
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
@@ -80,6 +83,7 @@ jobs:
         run: node scripts/analyze-mood.js
 
       - name: Commit generated mood output
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
