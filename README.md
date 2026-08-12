@@ -1,6 +1,6 @@
 # MOODAH
 
-MOODAH is a community-driven GitHub Pages mood board. Contributors add one entry to `data/manifest.json` with their GitHub username and five emoji strings. The automation validates the submission, generates the mood via Groq, and keeps AI output separate from contributor data.
+MOODAH is a community-driven GitHub Pages mood board. Contributors add one entry to `data/manifest.json` with their GitHub username and five emoji strings. The automation validates the submission, generates the mood via Groq, and keeps AI output separate from contributor data. Each GitHub username may contribute only once.
 
 ## How to contribute
 
@@ -20,9 +20,13 @@ If your PR passes validation and the required status checks, the automation will
 
 ## Mood generation
 
-Mood generation is AI-only and driven by Groq. Contributors only provide `username` and `emojis`; the bot generates `mood`, `description`, and timestamp data in `generated/mood-results.json`.
+Mood generation is AI-only and driven by Groq. Contributors only provide `username` and `emojis`; the bot generates `mood`, `description`, and timestamp data in `generated/mood-results.json`. This happens automatically once your PR merges — you never write your own mood or description, and there's no separate step to trigger it.
 
 If `generated/mood-results.json` is empty or missing, the site will show pending mood generation until the action completes.
+
+## One contribution per contributor
+
+Each GitHub username may appear in `data/manifest.json` only once. The validation step rejects any PR that reuses a username already present in the manifest, so you can't add a second entry for yourself later.
 
 ## Groq API key
 

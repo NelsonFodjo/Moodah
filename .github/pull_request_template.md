@@ -8,7 +8,8 @@
 - [ ] I did not include `mood`, `description`, `addedAt`, or any extra fields.
 - [ ] I validated the change locally with `npm run validate:local`.
 - [ ] I have not edited `generated/mood-results.json`.
+- [ ] This is my first and only contribution — my GitHub username is not already in `data/manifest.json`.
 
 ## Notes
 
-This repository expects one contributor entry per PR. The automation validates the manifest, runs the mood analysis, and merges the PR when the checks pass.
+This repository expects one contributor entry per PR, and only one contribution per GitHub username overall. The automation validates the manifest, then automatically generates your `mood` and `description` via AI and merges the PR when the checks pass — you don't add those fields yourself.
