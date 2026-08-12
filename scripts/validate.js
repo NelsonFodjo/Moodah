@@ -33,7 +33,15 @@ function deepEqual(a, b) {
 
 function isSingleEmoji(value) {
   if (typeof value !== 'string' || value.length === 0) return false;
-  return [...value].length === 1 && /\p{Extended_Pictographic}/u.test(value);
+
+  const segments = Array.from(
+    new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(value)
+  );
+
+  if (segments.length !== 1) return false;
+
+  const segment = segments[0].segment;
+  return /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Presentation})/u.test(segment);
 }
 
 function fail(message) {
