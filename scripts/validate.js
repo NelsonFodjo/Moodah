@@ -1,0 +1,123 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+
+const GITHUB_USERNAME_RE = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
+function readJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Unable to parse JSON from ${filePath}: ${error.message}`);
+  }
+}
+
+function isObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((item, index) => deepEqual(item, b[index]));
+  }
+  if (isObject(a) && isObject(b)) {
+    const aKeys = Object.keys(a).sort();
+    const bKeys = Object.keys(b).sort();
+    if (aKeys.length !== bKeys.length) return false;
+    return aKeys.every((key, index) => key === bKeys[index] && deepEqual(a[key], b[key]));
+  }
+  return false;
+}
+
+function isSingleEmoji(value) {
+  if (typeof value !== 'string' || value.length === 0) return false;
+  return [...value].length === 1 && /\p{Extended_Pictographic}/u.test(value);
+}
+
+function fail(message) {
+  console.error(`Validation failed: ${message}`);
+  process.exit(1);
+}
+
+function validateUsername(username) {
+  return typeof username === 'string' && username.length > 0 && GITHUB_USERNAME_RE.test(username);
+}
+
+function validateEntry(entry) {
+  if (!isObject(entry)) {
+    return 'Entry must be an object.';
+  }
+
+  if (!validateUsername(entry.username)) {
+    return 'username must be a non-empty GitHub username string.';
+  }
+
+  if (!Array.isArray(entry.emojis) || entry.emojis.length !== 5) {
+    return 'emojis must be an array of exactly 5 emoji strings.';
+  }
+
+  for (const emoji of entry.emojis) {
+    if (!isSingleEmoji(emoji)) {
+      return `emoji value ${JSON.stringify(emoji)} is not a single emoji character.`;
+    }
+  }
+
+  if ('mood' in entry || 'addedAt' in entry) {
+    return 'New entry must not include mood or addedAt; those are generated automatically.';
+  }
+
+  return null;
+}
+
+function findNewEntries(baseArray, headArray) {
+  return headArray.filter((entry) => !baseArray.some((baseItem) => deepEqual(baseItem, entry)));
+}
+
+function findBaseMismatch(baseArray, headArray) {
+  return baseArray.find((baseItem) => !headArray.some((headItem) => deepEqual(baseItem, headItem)));
+}
+
+function run() {
+  const [basePath, headPath] = process.argv.slice(2);
+  if (!basePath || !headPath) {
+    fail('Usage: node scripts/validate.js <base-manifest.json> <head-manifest.json>');
+  }
+
+  const base = readJson(basePath);
+  const head = readJson(headPath);
+
+  if (!Array.isArray(base)) {
+    fail('Base manifest must be an array.');
+  }
+  if (!Array.isArray(head)) {
+    fail('Head manifest must be an array.');
+  }
+
+  const mismatch = findBaseMismatch(base, head);
+  if (mismatch) {
+    fail('Existing entry was deleted or modified. No changes to existing entries are allowed.');
+  }
+
+  const newEntries = findNewEntries(base, head);
+  if (newEntries.length !== 1) {
+    fail(`Exactly one new entry must be added. Found ${newEntries.length}.`);
+  }
+
+  const newEntry = newEntries[0];
+  const validationError = validateEntry(newEntry);
+  if (validationError) {
+    fail(validationError);
+  }
+
+  const duplicateUsername = base.some((entry) => entry.username === newEntry.username);
+  if (duplicateUsername) {
+    fail(`username '${newEntry.username}' already exists in the base manifest.`);
+  }
+
+  console.log('Validation passed.');
+  process.exit(0);
+}
+
+run();

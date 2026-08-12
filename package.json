@@ -1,0 +1,14 @@
+{
+  "name": "moodah",
+  "version": "1.0.0",
+  "description": "A community-driven mood analyzer powered by GitHub PRs and emojis.",
+  "private": true,
+  "scripts": {
+    "validate": "echo \"To validate locally: copy your base manifest then run:\n  cp data/manifest.json /tmp/base-manifest.json\n  (edit data/manifest.json to add your new entry)\n  node scripts/validate.js /tmp/base-manifest.json data/manifest.json\"",
+    "validate:local": "cp data/manifest.json /tmp/base-manifest.json && node scripts/validate.js /tmp/base-manifest.json data/manifest.json",
+    "analyze": "node scripts/analyze-mood.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
