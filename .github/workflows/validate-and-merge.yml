@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.event.action != 'closed' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event.action != 'closed' && github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
 
     steps:
@@ -53,7 +53,7 @@ jobs:
           gh pr merge "${{ github.event.pull_request.number }}" --auto --merge --delete-branch
 
   generate-mood:
-    if: ${{ github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event.action == 'closed' && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
     steps:
