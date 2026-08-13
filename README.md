@@ -67,3 +67,12 @@ npm run analyze
 ## GitHub Pages
 
 The site is a static frontend that loads `data/manifest.json` and renders mood entries from the generated output.
+
+## FAQ — Forks, branches, and PRs
+
+- Q: If I merge into my fork's `main`, will upstream `main` get the change?
+   - A: No. Merging into your fork's `main` only updates your fork. To update the upstream `main`, open a PR from a branch in your fork (or a branch in the upstream repo) targeting `ORIGINAL_OWNER:main`.
+- Q: I accidentally merged into my fork's `main`. What do I do?
+   - A: Create a new branch from the commit you merged, push that branch to your fork, and open a PR from that branch into the upstream `main`.
+- Q: Can I open a PR from a branch in someone else's fork?
+   - A: Yes — GitHub supports PRs from forks. The PR must target the upstream `main` (the repository you are contributing to) to be considered for this project.
