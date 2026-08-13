@@ -24,7 +24,7 @@ git clone git@github.com:your-username/Moodah.git
 cd Moodah
 
 # Add upstream so you can stay in sync with the original repo
-git remote add upstream git@github.com:ORIGINAL_OWNER/Moodah.git
+git remote add upstream git@github.com:NelsonFodjo/Moodah.git
 git fetch upstream
 
 # Create a branch for your contribution (use your GitHub username)
@@ -37,15 +37,15 @@ git commit -m "Add contribution from your-username"
 # Push the branch to your fork
 git push origin your-username
 
-# Open a PR on GitHub from your-username (fork) -> ORIGINAL_OWNER:main
+# Open a PR on GitHub from your-username (fork) -> NelsonFodjo:main
 ``` 
 
 You can create the PR with the GitHub web UI (Compare & pull request) or the `gh` CLI:
 
 ```bash
 # Example using GitHub CLI
-gh repo fork ORIGINAL_OWNER/Moodah --clone=false # optional if you've already forked
-gh pr create --base ORIGINAL_OWNER:main --head your-username --title "Add your-username" --body "Adds contribution for @your-username"
+gh repo fork NelsonFodjo/Moodah --clone=false # optional if you've already forked
+gh pr create --base NelsonFodjo:main --head your-username --title "Add your-username" --body "Adds contribution for @your-username"
 ```
 
 If you accidentally merge changes into your fork's `main`, create a branch from that commit and open a PR from that branch to upstream `main`. Do not rely on merges to your fork's `main` as a substitute for opening a PR to the upstream repository.
@@ -96,7 +96,7 @@ The repository separates contributor input from generated AI output.
 ```json
 {
   "username": "your-username",
-  "emojis": ["😄", "🎨", "☕", "🎧", "🌙"]
+  "emojis": ["😄", "🎨", "😍", "🎧", "🌙"]
 }
 ```
 
