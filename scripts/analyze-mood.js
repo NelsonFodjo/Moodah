@@ -138,9 +138,20 @@ async function run() {
     throw new Error('Manifest must be a non-empty array.');
   }
 
-  const newEntry = manifest[manifest.length - 1];
+  // Normally we analyze the newest contribution (the last entry). For manual
+  // backfills (e.g. via workflow_dispatch after a prior run failed to
+  // generate a mood), TARGET_USERNAME lets us target a specific entry instead.
+  const targetUsername = process.env.TARGET_USERNAME;
+  const newEntry = targetUsername
+    ? manifest.find((entry) => entry.username === targetUsername)
+    : manifest[manifest.length - 1];
+
   if (!newEntry || !newEntry.username || !Array.isArray(newEntry.emojis)) {
-    throw new Error('The last entry must be the new entry with username and emojis.');
+    throw new Error(
+      targetUsername
+        ? `No manifest entry found for username "${targetUsername}".`
+        : 'The last entry must be the new entry with username and emojis.'
+    );
   }
 
   const moodData = await fetchGroqMood(newEntry.emojis, newEntry.username);

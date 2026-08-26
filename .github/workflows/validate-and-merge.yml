@@ -9,14 +9,59 @@ on:
       - ready_for_review
     paths:
       - 'data/manifest.json'
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'Manifest username to (re)generate a mood/description for'
+        required: true
+        type: string
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
+  backfill-mood:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate AI mood and description
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          GROQ_API_URL: ${{ secrets.GROQ_API_URL }}
+          TARGET_USERNAME: ${{ inputs.username }}
+        run: node scripts/analyze-mood.js
+
+      - name: Commit generated mood output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/mood-results.json
+          if git diff --cached --quiet; then
+            echo "No generated mood update needed."
+            exit 0
+          fi
+          git commit -m "Generate mood for ${{ inputs.username }} (manual backfill)"
+          git push origin HEAD:main
+
   validate:
-    if: ${{ github.event.pull_request.draft == false }}
+    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
 
     steps:
