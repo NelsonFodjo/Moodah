@@ -4,7 +4,7 @@ Thank you for contributing to MOODAH. To make your submission valid, follow thes
 
 > **Note:** You only submit your `username` and `emojis`. Once your pull request is merged, AI (via Groq) automatically generates your **mood** and **description** from those emojis — you don't write these yourself, and you don't need to open a follow-up PR to add them.
 >
-> **Each GitHub username may contribute only once.** Every entry in `data/manifest.json` must have a unique `username`; a PR that reuses a username already in the manifest (including your own, if you've contributed before) will fail validation.
+> **Each GitHub username may contribute only once.** Every entry in `data/manifest.json` must have a unique `username`; a PR that adds a username already in the manifest will fail validation. If you've already contributed and want to change your emojis, see [Editing your contribution](#editing-your-contribution) instead of adding a new entry.
 
 ## Cloning, Forking, and PR workflow
 
@@ -80,6 +80,15 @@ Do not include any of these fields in your contribution:
 - `addedAt`
 - any other extra fields
 
+## Editing your contribution
+
+Changed your mind about your emojis? You can update your own entry later.
+
+- Open a PR from your username branch that changes **only your own entry's `emojis`** in `data/manifest.json`.
+- You must be the same GitHub user who owns that entry — the workflow checks that the PR author's GitHub login matches the `username` on the entry being edited, and will reject the PR otherwise.
+- Don't change your `username`, and don't add `mood`, `description`, or `addedAt` yourself — mood and description are regenerated automatically from your new emojis once the edit merges.
+- You can only touch one entry (yours) per PR, and no other entries may change.
+
 ## Why this matters
 
 The repository separates contributor input from generated AI output.
@@ -119,7 +128,8 @@ node -e "JSON.parse(require('fs').readFileSync('data/manifest.json', 'utf8')); c
 ## Pull request rules
 
 - Use a branch named after your GitHub username
-- Add a single new object to `data/manifest.json`
+- Add a single new object to `data/manifest.json`, or edit only your own existing entry's `emojis`
+- Your GitHub username must match the `username` on the entry you're adding or editing
 - Do not modify `generated/mood-results.json`
 - Do not include mood fields or addedAt
 - Keep the PR small and focused

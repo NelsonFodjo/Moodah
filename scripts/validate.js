@@ -92,10 +92,28 @@ function findBaseMismatch(baseArray, headArray) {
   return baseArray.find((baseItem) => !headArray.some((headItem) => deepEqual(baseItem, headItem)));
 }
 
+function validateEmojisEdit(baseEntry, headEntry) {
+  if (baseEntry.username !== headEntry.username) {
+    return 'username must not change when editing an entry.';
+  }
+  if ('mood' in headEntry || 'addedAt' in headEntry) {
+    return 'Edited entry must not include mood or addedAt; those are regenerated automatically.';
+  }
+  if (!Array.isArray(headEntry.emojis) || headEntry.emojis.length !== 5) {
+    return 'emojis must be an array of exactly 5 emoji strings.';
+  }
+  for (const emoji of headEntry.emojis) {
+    if (!isSingleEmoji(emoji)) {
+      return `emoji value ${JSON.stringify(emoji)} is not a single emoji character.`;
+    }
+  }
+  return null;
+}
+
 function run() {
-  const [basePath, headPath] = process.argv.slice(2);
+  const [basePath, headPath, prAuthor] = process.argv.slice(2);
   if (!basePath || !headPath) {
-    fail('Usage: node scripts/validate.js <base-manifest.json> <head-manifest.json>');
+    fail('Usage: node scripts/validate.js <base-manifest.json> <head-manifest.json> [pr-author]');
   }
 
   const base = readJson(basePath);
@@ -106,6 +124,43 @@ function run() {
   }
   if (!Array.isArray(head)) {
     fail('Head manifest must be an array.');
+  }
+
+  // Same array length and same order of usernames, but at least one entry
+  // differs -> this is an edit to an existing entry rather than a new
+  // contribution. Comparing by position (not just by username set) also
+  // ensures reordering the array isn't silently accepted as an "edit".
+  const sameOrder =
+    base.length === head.length && base.every((entry, index) => entry.username === head[index].username);
+
+  if (sameOrder) {
+    const changedPairs = base
+      .map((baseEntry, index) => ({ baseEntry, headEntry: head[index] }))
+      .filter(({ baseEntry, headEntry }) => !deepEqual(baseEntry, headEntry));
+
+    if (changedPairs.length === 0) {
+      fail('No changes detected. Nothing to validate.');
+    }
+    if (changedPairs.length > 1) {
+      fail(`Exactly one entry may be edited at a time. Found ${changedPairs.length} changed entries.`);
+    }
+
+    const { baseEntry, headEntry } = changedPairs[0];
+
+    if (!prAuthor) {
+      fail('Unable to determine PR author for edit authorization.');
+    }
+    if (baseEntry.username !== prAuthor) {
+      fail(`Only ${baseEntry.username} may edit this entry. PR was opened by ${prAuthor}.`);
+    }
+
+    const editError = validateEmojisEdit(baseEntry, headEntry);
+    if (editError) {
+      fail(editError);
+    }
+
+    console.log(`Validation passed (edit to existing entry '${baseEntry.username}').`);
+    process.exit(0);
   }
 
   const mismatch = findBaseMismatch(base, head);
@@ -119,6 +174,11 @@ function run() {
   }
 
   const newEntry = newEntries[0];
+
+  if (prAuthor && newEntry.username !== prAuthor) {
+    fail(`New entry username '${newEntry.username}' must match the PR author '${prAuthor}'.`);
+  }
+
   const validationError = validateEntry(newEntry);
   if (validationError) {
     fail(validationError);

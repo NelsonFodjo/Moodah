@@ -84,11 +84,12 @@ jobs:
       - name: Fetch base manifest and validate PR
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           git fetch origin "$BASE_REF" --depth=1
           git show "origin/$BASE_REF:data/manifest.json" > /tmp/base-manifest.json
           cp data/manifest.json /tmp/head-manifest.json
-          node scripts/validate.js /tmp/base-manifest.json /tmp/head-manifest.json
+          node scripts/validate.js /tmp/base-manifest.json /tmp/head-manifest.json "$PR_AUTHOR"
 
       - name: Auto-merge pull request
         if: success()
@@ -126,6 +127,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           GROQ_API_URL: ${{ secrets.GROQ_API_URL }}
+          TARGET_USERNAME: ${{ github.event.pull_request.user.login }}
         run: node scripts/analyze-mood.js
 
       - name: Commit generated mood output
