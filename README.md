@@ -1,5 +1,7 @@
 # MOODAH
 
+Link: https://nelsonfodjo.github.io/Moodah/
+
 MOODAH is a community-driven GitHub Pages mood board. Contributors add one entry to `data/manifest.json` with their GitHub username and five emoji strings. The automation validates the submission, generates the mood via Groq, and keeps AI output separate from contributor data. Each GitHub username may contribute only once.
 
 ## How to contribute
