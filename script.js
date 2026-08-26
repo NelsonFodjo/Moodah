@@ -1,16 +1,10 @@
 const manifestBody = document.getElementById('manifest-body');
 const filterInput = document.getElementById('filter-input');
 const sortToggle = document.getElementById('sort-toggle');
-const newPrLink = document.getElementById('new-pr-link');
 
 let entries = [];
 let moodResults = [];
 let sortNewest = true;
-
-function getNewPrUrl() {
-  const repoPlaceholder = 'https://github.com/your-username/Moodah/edit/main/data/manifest.json';
-  return repoPlaceholder;
-}
 
 function createBadge(mood) {
   const badge = document.createElement('span');
@@ -119,7 +113,5 @@ sortToggle.addEventListener('click', () => {
   sortToggle.textContent = sortNewest ? 'Sort by most recent ↓' : 'Sort by oldest ↑';
   applyFilterAndSort();
 });
-
-newPrLink.href = 'https://github.com/your-username/Moodah/edit/main/data/manifest.json';
 
 loadData();
