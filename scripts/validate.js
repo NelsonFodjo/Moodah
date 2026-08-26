@@ -8,7 +8,12 @@ function readJson(filePath) {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (error) {
-    throw new Error(`Unable to parse JSON from ${filePath}: ${error.message}`);
+    throw new Error(
+      `Unable to parse JSON from ${filePath}: ${error.message}\n` +
+        'This usually means a missing or extra comma between objects in the array. ' +
+        'Every entry except the last one needs a trailing comma, and the last entry must not have one. ' +
+        'See CONTRIBUTING.md for an example.'
+    );
   }
 }
 

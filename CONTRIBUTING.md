@@ -100,6 +100,22 @@ The repository separates contributor input from generated AI output.
 }
 ```
 
+### A common mistake: broken JSON
+
+`data/manifest.json` is a JSON array of objects. If you're editing it by hand (especially in the GitHub web UI), it's easy to forget a comma between your new object and the one before it, which makes the whole file invalid JSON and fails the `validate.js` check with an error like `Unable to parse JSON ... Expected ',' or ']'`.
+
+Before opening your PR, make sure:
+
+- There is a `,` right after the closing `}` of the entry before yours (every object in the array except the last one needs a trailing comma).
+- Your new object is the **last** one in the array, right before the final `]`, and does **not** have a trailing comma after its own closing `}`.
+- The file still starts with `[` and ends with `]`.
+
+If you're unsure, run it through any JSON validator/formatter, or locally:
+
+```bash
+node -e "JSON.parse(require('fs').readFileSync('data/manifest.json', 'utf8')); console.log('valid JSON')"
+```
+
 ## Pull request rules
 
 - Use a branch named after your GitHub username
@@ -109,4 +125,3 @@ The repository separates contributor input from generated AI output.
 - Keep the PR small and focused
 
 Thanks! Your branch will be validated and merged automatically if it follows these rules.
-」

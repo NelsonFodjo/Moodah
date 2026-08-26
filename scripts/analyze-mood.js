@@ -53,7 +53,7 @@ function parseJsonFromText(text) {
 async function fetchGroqMood(emojis, username) {
   const apiKey = process.env.GROQ_API_KEY;
   const apiUrl = process.env.GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
-  const model = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
   const timeoutMs = Number(process.env.GROQ_TIMEOUT_MS) || 30000; // 30s default
   const retries = Math.max(0, Number(process.env.GROQ_RETRIES) || 2); // retry twice by default
 
